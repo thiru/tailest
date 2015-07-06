@@ -2,6 +2,6 @@
 
 (ql:quickload :tailest)
 (save-application "tailest.exe"
-  :toplevel-function #'tailest:run
-  :error-handler :quit
-  :prepend-kernel t)
+                  :toplevel-function #'tailest:run
+                  :error-handler :quit
+                  :prepend-kernel t)
