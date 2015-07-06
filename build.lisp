@@ -1,4 +1,4 @@
-;;;; Builds executables
+;;;; Builds the executable under SBCL
 
 (ql:quickload :tailest)
 (in-package :tailest)

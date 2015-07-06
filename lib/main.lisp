@@ -8,7 +8,7 @@
          (files (directory-files target-dir)))
     (if (null files)
       (format t "No files found in ~a~%" target-dir)
-      (format t "~{~a~^~%~}~%" (get-last-n-lines (get-latest-file files) 10)))))
+      (format t "~{~a~^~%~}~%" (get-last-n-lines (get-latest-file files) 20)))))
 
 (defun get-latest-file (files)
   (let ((sorted-files (stable-sort files #'> :key #'safe-file-write-date)))
