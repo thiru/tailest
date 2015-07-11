@@ -35,11 +35,13 @@
   (let ((parsed-args `(:show-help nil
                        :num-lines ,default-num-lines)))
     (dolist (arg cmd-args)
-      (cond ((arg=? arg "--help" "-h")
+      (cond ((arg=? arg "--debug" "-d")
+             (setf debug-mode t))
+            ((arg=? arg "--help" "-h")
              (pl=> parsed-args :show-help t))
 
-             ((arg=? arg "--num-files" "-n")
-              (pl=> parsed-args :num-lines (get-num-lines cmd-args arg)))))
+            ((arg=? arg "--num-files" "-n")
+             (pl=> parsed-args :num-lines (get-num-lines cmd-args arg)))))
     parsed-args))
 
 (defun arg=? (arg-val &rest arg-names)
