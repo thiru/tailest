@@ -1,7 +1,7 @@
 ;;;; Tailest build configuration
 
 (asdf:defsystem :tailest
-  :version "0.1"
+  :version "0.2"
   :description "Shows the last *n* lines of the last modified file in a directory"
   :author "Thirushanth Thirunavukarasu <thiru0130@gmail.com>"
   :license "GPLv2"
