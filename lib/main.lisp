@@ -1,12 +1,13 @@
 (in-package :tailest)
 
-(defvar app-version 0.2)
-(defvar app-updated "Jul 10 2015")
+(defparameter app-version 0.2)
+(defparameter app-updated "Jul 12 2015")
 
 (defparameter debug-mode nil)
-(defparameter debug-args '("-a" "--help" "-n" "23"))
+(defparameter debug-args '("-v" "--help" "-n" "23"))
 
 (defparameter num-lines-default 30)
+(defparameter help-text "Help did not get loaded during build...")
 
 (defun run ()
   "Run the app."
@@ -16,15 +17,38 @@
          (target-dir (getcwd))
          (files (directory-files target-dir)))
     (if debug-mode (format t "Parsed args: ~A~%" parsed-args))
-    (if (null files)
-      (format t "No files found in ~a~%" target-dir)
-      (let ((num-lines (getf parsed-args :num-lines)))
-        (format t "~{~a~^~%~}~%"
-                (get-last-n-lines
-                  (get-latest-file files)
-                  (if (> num-lines 0)
-                    num-lines
-                    num-lines-default)))))))
+    (cond ((getf parsed-args :show-help)
+           (format t help-text))
+          ((getf parsed-args :show-version)
+           (format t "~a~%" app-version))
+          ((null files)
+           (format t "No files found in ~a~%" target-dir))
+          (t
+           (show-last-n-lines files parsed-args num-lines-default)))))
+
+(defun get-help-text (file-name)
+  "Load the help content from the `file-name`. The first line of this content
+   will be suffixed with the version and date last updated."
+  (let ((first-line-read? nil)
+        (help-text (make-string-output-stream)))
+    (with-open-file (stream file-name :direction :input)
+      (loop for line = (read-line stream nil)
+            while line do
+            (if first-line-read?
+              (format help-text "~a~%" line)
+              (format help-text "~a v~a (~a)~%" line app-version app-updated))
+            (setf first-line-read? t)))
+    (get-output-stream-string help-text)))
+
+(defun show-last-n-lines (files parsed-args num-lines-default)
+  "Show the last `n` lines of the last modified file in `files`."
+  (let ((num-lines (getf parsed-args :num-lines)))
+    (format t "~{~a~^~%~}~%"
+            (get-last-n-lines
+              (get-latest-file files)
+              (if (> num-lines 0)
+                num-lines
+                num-lines-default)))))
 
 (defmacro pl=> (l k v)
   "Sets the value of a plist key/value pair."
@@ -33,15 +57,20 @@
 (defun parse-cmd-args (cmd-args default-num-lines)
   "Parse the given command-line arguments."
   (let ((parsed-args `(:show-help nil
+                       :show-version nil
                        :num-lines ,default-num-lines)))
     (dolist (arg cmd-args)
       (cond ((arg=? arg "--debug" "-d")
              (setf debug-mode t))
+
             ((arg=? arg "--help" "-h")
              (pl=> parsed-args :show-help t))
 
             ((arg=? arg "--num-files" "-n")
-             (pl=> parsed-args :num-lines (get-num-lines cmd-args arg)))))
+             (pl=> parsed-args :num-lines (get-num-lines cmd-args arg)))
+
+            ((arg=? arg "--version" "-v")
+             (pl=> parsed-args :show-version t))))
     parsed-args))
 
 (defun arg=? (arg-val &rest arg-names)
