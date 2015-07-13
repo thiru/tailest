@@ -4,7 +4,7 @@
 (defparameter app-updated "Jul 12 2015")
 
 (defparameter debug-mode nil)
-(defparameter debug-args '("-v" "--help" "-n" "23"))
+(defparameter debug-args '("-n" "a"))
 
 (defparameter num-lines-default 30)
 (defparameter help-text "Help did not get loaded during build...")
@@ -17,7 +17,10 @@
          (target-dir (getcwd))
          (files (directory-files target-dir)))
     (if debug-mode (format t "Parsed args: ~A~%" parsed-args))
-    (cond ((getf parsed-args :show-help)
+    (cond ((getf parsed-args :invalid-arg)
+           (format t "Invalid argument: '~A'~%"
+                   (getf parsed-args :invalid-arg)))
+          ((getf parsed-args :show-help)
            (format t help-text))
           ((getf parsed-args :show-version)
            (format t "~a~%" app-version))
@@ -46,9 +49,9 @@
     (format t "~{~a~^~%~}~%"
             (get-last-n-lines
               (get-latest-file files)
-              (if (> num-lines 0)
-                num-lines
-                num-lines-default)))))
+              (if (or (null num-lines) (<= num-lines 0))
+                num-lines-default
+                num-lines)))))
 
 (defmacro pl=> (l k v)
   "Sets the value of a plist key/value pair."
@@ -58,19 +61,28 @@
   "Parse the given command-line arguments."
   (let ((parsed-args `(:show-help nil
                        :show-version nil
-                       :num-lines ,default-num-lines)))
+                       :num-lines ,default-num-lines
+                       :invalid-arg nil))
+        (skip-next-arg? nil))
     (dolist (arg cmd-args)
-      (cond ((arg=? arg "--debug" "-d")
+      (cond (skip-next-arg?
+             (setf skip-next-arg? nil))
+        
+            ((arg=? arg "--debug" "-d")
              (setf debug-mode t))
 
             ((arg=? arg "--help" "-h")
              (pl=> parsed-args :show-help t))
 
             ((arg=? arg "--num-files" "-n")
-             (pl=> parsed-args :num-lines (get-num-lines cmd-args arg)))
+             (pl=> parsed-args :num-lines (get-num-lines cmd-args arg))
+             (setf skip-next-arg? t))
 
             ((arg=? arg "--version" "-v")
-             (pl=> parsed-args :show-version t))))
+             (pl=> parsed-args :show-version t))
+            
+            (t
+             (pl=> parsed-args :invalid-arg arg))))
     parsed-args))
 
 (defun arg=? (arg-val &rest arg-names)
