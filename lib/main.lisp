@@ -7,7 +7,7 @@
 (defparameter debug-args '("-n" "a"))
 
 (defparameter num-lines-default 30)
-(defparameter help-text "Help did not get loaded during build...")
+(defparameter help-text "Help was not loaded during build.")
 
 (defun main ()
   "Run the app."
