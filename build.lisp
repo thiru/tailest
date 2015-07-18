@@ -8,7 +8,7 @@
                                  :save-runtime-options t
                                  :toplevel #'tailest:main)
 #+ccl (save-application #+linux "tailest" #+windows "tailest.exe"
-                          :toplevel-function #'tailest:main
-                          :error-handler :quit
-                          :prepend-kernel t)
+                        :error-handler :quit
+                        :prepend-kernel t 
+                        :toplevel-function #'tailest:main)
 #-(or sbcl ccl) (error "Unsupported Common Lisp platform.")
