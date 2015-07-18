@@ -4,6 +4,7 @@
 (in-package :tailest)
 (setf help-text (get-help-text "README.md"))
 (sb-ext:save-lisp-and-die "tailest"
-                          :toplevel #'run
+                          :compression t 
                           :executable t
-                          :compression t)
+                          :save-runtime-options t
+                          :toplevel #'run)
