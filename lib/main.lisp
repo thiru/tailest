@@ -1,7 +1,7 @@
 (in-package :tailest)
 
 (defparameter app-version 0.2)
-(defparameter app-updated "Jul 12 2015")
+(defparameter app-updated "Jul 17 2015")
 
 (defparameter debug-mode nil)
 (defparameter debug-args '("-n" "a"))
@@ -9,7 +9,7 @@
 (defparameter num-lines-default 30)
 (defparameter help-text "Help did not get loaded during build...")
 
-(defun run ()
+(defun main ()
   "Run the app."
   (if debug-mode (format t "Command-line args: ~A~%" (command-line-arguments)))
   (let* ((cmd-args (if debug-mode debug-args (command-line-arguments)))
