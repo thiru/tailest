@@ -46,7 +46,7 @@
 (defun show-last-n-lines (files parsed-args num-lines-default)
   "Show the last `n` lines of the last modified file in `files`."
   (let ((num-lines (getf parsed-args :num-lines)))
-    (format t "~{~a~^~%~}~%"
+    (format t "~A~%"
             (get-last-n-lines
               (get-latest-file files)
               (if (or (null num-lines) (<= num-lines 0))
@@ -107,20 +107,26 @@
 (defun get-last-n-lines (file n)
   "Get the last `n` lines in `file`."
   (if debug-mode (format t "Num lines: ~A~%" n))
-  (let ((last-lines (make-array n :initial-element nil))
-        (idx 0)
-        (final-lines nil))
-    (with-open-file (stream file)
-      (loop for line = (read-line stream nil)
-            while line do
-              (setf (aref last-lines idx) line)
-              (setf idx (inc-wrap idx n))))
-    (setf idx (dec-wrap idx n))
-    (dotimes (i n)
-      (unless (null (aref last-lines idx))
-        (push (aref last-lines idx) final-lines))
-      (setf idx (dec-wrap idx n)))
-    final-lines))
+  (with-open-file (stream file)
+    (if debug-mode (format t "First char: ~A~%" (read-char-no-hang stream)))
+    (if debug-mode (format t "File length: ~A~%" (file-length stream)))
+    (let ((file-pos (- (file-length stream) 1))
+          (char nil)
+          (new-line-count 0))
+      (file-position stream file-pos)
+      (loop (when (or (zerop file-pos) (>= new-line-count n))
+              (return))
+            (decf file-pos)
+            (file-position stream file-pos)
+            (setf char (read-char-no-hang stream))
+            (if (equalp char #\newline) (incf new-line-count))
+            (if debug-mode (format t "Pos: ~A | Char: ~A~%" file-pos char)))
+      (incf file-pos)
+      (file-position stream file-pos)
+      (if debug-mode (format t "Final file position: ~A~%" file-pos))
+      (let ((final-string (make-string (- (file-length stream) (+ file-pos 2)))))
+        (read-sequence final-string stream)
+        final-string))))
 
 (defun inc-wrap (i length)
   "Increment `i` if it's less than `length`, otherwise return 0."
