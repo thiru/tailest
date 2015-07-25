@@ -1,7 +1,7 @@
 (in-package :tailest)
 
-(defparameter app-version 0.2)
-(defparameter app-updated "Jul 18 2015")
+(defparameter app-version 1.0)
+(defparameter app-updated "Jul 24 2015")
 
 (defparameter debug-mode nil)
 (defparameter debug-args '("-n" "a"))

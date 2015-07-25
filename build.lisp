@@ -1,4 +1,4 @@
-;;;; Builds the executable under SBCL
+;;;; Builds the executable
 
 (ql:quickload :tailest)
 (setf tailest:help-text (tailest:get-help-text "README.md"))
@@ -11,4 +11,4 @@
                         :error-handler :quit
                         :prepend-kernel t 
                         :toplevel-function #'tailest:main)
-#-(or sbcl ccl) (error "Unsupported Common Lisp platform.")
+#-(or sbcl ccl) (error "Sorry, only SBCL and CCL are currently supported.")
