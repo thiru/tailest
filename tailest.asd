@@ -10,4 +10,4 @@
                (:static-file "LICENSE")
                (:static-file "EULA")
                (:file "package")
-               (:file "lib/main")))
+               (:file "main")))
