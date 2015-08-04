@@ -4,16 +4,14 @@
 (defparameter app-updated "Jul 24 2015")
 
 (defparameter debug-mode nil)
-(defparameter debug-args '("-n" "a"))
 
 (defparameter num-lines-default 30)
 (defparameter help-text "Help was not loaded during build.")
 
-(defun main ()
+(defun main (&optional argv)
   "Run the app."
-  (if debug-mode (format t "Command-line args: ~A~%" (command-line-arguments)))
-  (let* ((cmd-args (if debug-mode debug-args (command-line-arguments)))
-         (parsed-args (parse-cmd-args cmd-args num-lines-default))
+  (if debug-mode (format t "Command-line args: ~A~%" argv))
+  (let* ((parsed-args (parse-argv argv))
          (target-dir (getcwd))
          (files (directory-files target-dir)))
     (if debug-mode (format t "Parsed args: ~A~%" parsed-args))
@@ -57,14 +55,12 @@
   "Sets the value of a plist key/value pair."
   `(setf (getf ,l ,k) ,v))
 
-(defun parse-cmd-args (cmd-args default-num-lines)
+(defun parse-argv (argv)
   "Parse the given command-line arguments."
-  (let ((parsed-args `(:show-help nil
-                       :show-version nil
-                       :num-lines ,default-num-lines
-                       :invalid-arg nil))
+  (let ((parsed-args '())
         (skip-next-arg? nil))
-    (dolist (arg cmd-args)
+    (format t "Initial parsed-args: ~A~%" parsed-args)
+    (dolist (arg argv)
       (cond (skip-next-arg?
              (setf skip-next-arg? nil))
         
@@ -75,7 +71,7 @@
              (pl=> parsed-args :show-help t))
 
             ((arg=? arg "--num-files" "-n")
-             (pl=> parsed-args :num-lines (get-num-lines cmd-args arg))
+             (pl=> parsed-args :num-lines (get-num-lines argv arg))
              (setf skip-next-arg? t))
 
             ((arg=? arg "--version" "-v")
@@ -90,14 +86,14 @@
   (if (null arg-names) (error "No argument names provided."))
   (find arg-val arg-names :test #'equalp))
 
-(defun get-num-lines (cmd-args arg-name)
+(defun get-num-lines (argv arg-name)
   "Get the argument specifying number of lines."
-  (let ((arg-idx (position arg-name cmd-args :test #'equalp)))
+  (let ((arg-idx (position arg-name argv :test #'equalp)))
     (if (or (null arg-idx)
             (< arg-idx 0)
-            (>= (+ 1 arg-idx) (length cmd-args)))
+            (>= (+ 1 arg-idx) (length argv)))
       (values 0 0)
-      (parse-integer (nth (+ 1 arg-idx) cmd-args) :junk-allowed t))))
+      (parse-integer (nth (+ 1 arg-idx) argv) :junk-allowed t))))
 
 (defun get-latest-file (files)
   "Find the last modified file in `files`."
